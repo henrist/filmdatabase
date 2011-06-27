@@ -120,6 +120,7 @@ $template->css .= '
 $ret = '
 <h1>Filmdatabase <i style="font-size: 70%; font-weight: normal">av <a href="http://henrist.net/">Henrik</a></i></h1>
 <p>Denne siden er en indeksert oversikt over alle filmene jeg har, og hvor det er mulig å søke og filtrere ut listen for å finne en passende film å se. Det er et delvis uferdig produkt, og det hender jeg tar noen timer når jeg er ledig og oppdaterer med litt ny funksjonalitet. Oversikten er generert med data fra IMDB.</p>
+<p><a href="?manage">Behandle liste og indekser filmer &raquo;</a></p>
 
 <fieldset class="hide" id="filterarea">
 	<legend>Filtrering</legend>

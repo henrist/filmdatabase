@@ -5,7 +5,7 @@ class hs_filmdb_imdb {
 	
 	public static function log_imdb_http($msg)
 	{
-		file_put_contents(IMDB_LOG, date("r") . " $msg\n", FILE_APPEND);
+		file_put_contents(self::IMDB_LOG, date("r") . " $msg\n", FILE_APPEND);
 	}
 	
 	/**

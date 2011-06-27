@@ -91,13 +91,14 @@ class hs_filmdb
 	 * @return hs_filmdb_ffmpeg
 	 */
 	public function get_ffmpeg() {
-		if ($this->ffmpeg) return $this->ffmpeg;
+		if ($this->ffmpeg !== null) return $this->ffmpeg;
 		
 		require_once "ffmpeg.php";
 		try {
 			$ffmpeg = new hs_filmdb_ffmpeg($this->set->ffmpeg_bin_path);
 		} catch (Exception $e) {
-			
+			$this->ffmpeg = false;
+			return false;
 		}
 		
 		$this->ffmpeg = $ffmpeg;

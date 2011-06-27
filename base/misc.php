@@ -146,7 +146,7 @@ class httpreq_imdbdata extends httpreq
 		$ret = parent::get($path, $cookies, $receive_data);
 		if ($ret !== false)
 		{
-			hs_imdbdata::log_imdb_http("(".str_pad(round((microtime(true)-$t)*1000, 0), 4, " ", STR_PAD_LEFT) . "ms) Fetched http://$this->host$path");
+			hs_filmdb_imdb::log_imdb_http("(".str_pad(round((microtime(true)-$t)*1000, 0), 4, " ", STR_PAD_LEFT) . "ms) Fetched http://$this->host$path");
 		}
 		return $ret;
 	}

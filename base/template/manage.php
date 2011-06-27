@@ -15,6 +15,7 @@ array_multisort($t_n, $filmer['indexed']);
 
 echo '
 <h1>Indekserte filmer</h1>
+<p><a href=".">Vis søkbar liste &raquo;</a></p>
 <p>Antall: '.count($filmer['indexed']).'</p>
 <p id="showposters"><a href="#">Vis posters for filmene</a></p>
 <table class="table">

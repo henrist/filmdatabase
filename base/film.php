@@ -585,8 +585,8 @@ class hs_filmdb_film
 			if (preg_match("~(^\\.|\\.(rar|r[0-9]{2}|nfo|sfv|jpg|png|gif|zip)\$)~i", $file)) continue;
 			
 			// forsøk å lese med ffmpeg
-			$data = $this->filmdb->get_ffmpeg()->get_moviefile_details($this->path."/".$file);
-			if ($data)
+			$ffmpeg = $this->filmdb->get_ffmpeg();
+			if ($ffmpeg && ($data = $ffmpeg->get_moviefile_details($this->path."/".$file)))
 			{
 				$ret = $data;
 				break;

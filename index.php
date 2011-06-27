@@ -38,9 +38,9 @@ $template = new hs_filmdb_template();
 }*/
 
 // indeksere en bestemt film?
-/*if (isset($_GET['indexs']))
+if (isset($_GET['indexs']))
 {
-	$film = hs_imdbdata::get_movie($_GET['indexs']);
+	$film = $filmdb->get_movie_by_pathid($_GET['indexs']);
 	if (!$film) die("Fant ikke filmen.");
 	
 	// har vi gitt imdb-id?
@@ -51,10 +51,10 @@ $template = new hs_filmdb_template();
 	}
 	
 	$film->build_cache(true);
-	echo "Indexed " . $film->get("title") . " (".$film->get("year").")";
+	echo "Indekserte " . $film->get("title") . " (".$film->get("year").")";
 	
 	die;
-}*/
+}
 
 //if (isset($_SERVER['argv'])) die("Running as CLI.");
 
