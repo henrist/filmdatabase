@@ -217,7 +217,7 @@ class hs_filmdb
 	 */
 	public static function search_folder($folder, $fn_criteria)
 	{
-		$dh = opendir($folder);
+		$dh = @opendir($folder); // TODO: gi feilmelding hvis mappen ikke kan åpnes
 		if (!$dh) return array();
 		
 		$ret = array();
