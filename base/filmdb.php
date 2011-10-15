@@ -16,6 +16,11 @@ class hs_filmdb
 	public $movies;
 	
 	/**
+	 * Cache for metadata for filmer
+	 */
+	public $metadata_cache;
+	
+	/**
 	 * Konstruktør...
 	 */
 	public function __construct()
@@ -218,7 +223,7 @@ class hs_filmdb
 	 */
 	public static function search_folder($folder, $fn_criteria)
 	{
-		$dh = @opendir($folder); // TODO: gi feilmelding hvis mappen ikke kan åpnes
+		$dh = opendir($folder); // TODO: gi feilmelding hvis mappen ikke kan åpnes
 		if (!$dh) return array();
 		
 		$ret = array();
@@ -229,5 +234,62 @@ class hs_filmdb
 		}
 		
 		return $ret;
+	}
+	
+	/**
+	 * Hent cache for metadata
+	 */
+	public function cache_load($reload = false)
+	{
+		if ($this->metadata_cache && !$reload) return;
+		
+		// har vi cache?
+		if (file_exists($this->set->file_path_data_cache))
+		{
+			$this->metadata_cache = unserialize(file_get_contents($this->set->file_path_data_cache));
+		}
+		
+		else
+		{
+			$this->metadata_cache = array();
+		}
+	}
+	
+	/**
+	 * Hent cache for metadata for en spesifikk film
+	 */
+	public function cache_get($path_id)
+	{
+		if ($this->metadata_cache === null) $this->cache_load();
+		
+		if (isset($this->metadata_cache[$path_id])) return $this->metadata_cache[$path_id];
+		return null;
+	}
+	
+	/**
+	 * Lagre cache for metadata for en spesifikk film
+	 */
+	public function cache_set(hs_filmdb_film $film)
+	{
+		if ($this->metadata_cache === null) $this->cache_load();
+		
+		if ($film->cache === null) $film->load_cache();
+		
+		$this->metadata_cache[$film->path_id] = array(
+			"cache_time" => time(),
+			"movie_details" => $film->get_movie_details(),
+			"imdb" => $film->cache
+		);
+		
+		// TODO: nå skrives hele filen til disk hver gang en film oppdages, og ikke til slutt etter alle er lest inn
+		$this->cache_save();
+	}
+	
+	/**
+	 * Lagre cache for metadata
+	 */
+	public function cache_save()
+	{
+		file_put_contents($this->set->file_path_data_cache, serialize($this->metadata_cache));
 	}
 }

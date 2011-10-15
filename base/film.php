@@ -9,6 +9,7 @@ class hs_filmdb_film
 	protected $imdb_id_custom; // flagg: settes til true for å overkjøre cache = false (når id er satt)
 	protected $imdb_data;
 	public $cache;
+	public $cache_movie;
 	
 	const FILE_IMDB_ID = ".filmdata-imdb-id";
 	const FILE_IMDB_CACHE = ".filmdata-imdb-cache";
@@ -70,6 +71,12 @@ class hs_filmdb_film
 	 */
 	public function load_cache($cache = true, $save = true)
 	{
+		// forsøk og hent global cache
+		if ($save || $cache)
+		{
+			if ($this->cache_global_load($cache)) return;
+		}
+		
 		$path = $this->path."/".self::FILE_IMDB_CACHE_S;
 		if ($cache && file_exists($path))
 		{
@@ -567,18 +574,31 @@ class hs_filmdb_film
 	 */
 	public function get_movie_details($cache = true, $save = true)
 	{
-		// list opp alle filene i mappen
-		$files = hs_filmdb::search_folder($this->path, function($folder, $file)
+		if ($this->cache_movie !== null)
 		{
-			return is_file($folder."/".$file);
-		});
+			return $this->cache_movie;
+		}
 		
+		// forsøk og hent global cache
+		if ($save || $cache)
+		{
+			if ($this->cache_global_load($cache)) return $this->cache_movie;
+		}
+		
+		// sjekk for cache
 		$path = $this->path."/".self::FILE_MOVIE_METADATA;
 		if ($cache && file_exists($path))
 		{
 			return unserialize(file_get_contents($path));
 		}
 		
+		// list opp alle filene i mappen
+		$files = hs_filmdb::search_folder($this->path, function($folder, $file)
+		{
+			return is_file($folder."/".$file);
+		});
+		
+		// generer cache
 		$ret = NULL;
 		foreach ($files as $file)
 		{
@@ -632,4 +652,30 @@ class hs_filmdb_film
 		return filectime($this->path."/.filmdata-imdb-cache");
 	}
 	
+	/**
+	 * Hent info fra global cache
+	 */
+	public function cache_global_load($cache = true)
+	{
+		static $is_loading = false;
+		if ($is_loading) return false; // avoid recursive calls
+		$is_loading = true;
+		
+		// forsøk og last inn cache
+		$res = $cache ? $this->filmdb->cache_get($this->path_id) : null;
+		if (!$res)
+		{
+			// generer cache
+			$this->filmdb->cache_set($this);
+		}
+		
+		else
+		{
+			$this->cache_movie = $res['movie_details'];
+			$this->cache = $res['imdb'];
+		}
+		
+		$is_loading = false;
+		return true;
+	}
 }

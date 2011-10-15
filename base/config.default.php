@@ -10,8 +10,11 @@ class hs_filmdb_set
 	/** Liste over filmer som er sett */
 	public $file_seen = ".filmdata-seen";
 	
-	/** Film som inneholder cache over path_id */
+	/** Fil som inneholder cache over path_id */
 	public $file_path_id_cache = ".filmdata-path-id-cache";
+	
+	/** Fil med cache for data */
+	public $file_path_data_cache = ".filmdata-data-cache";
 	
 	/** Mapper med filmre som blir gjennomsøkt */
 	public $paths = array(
