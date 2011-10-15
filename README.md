@@ -34,7 +34,6 @@ TODO
 ----
 
 * Gjøre det mulig å indeksere mapper igjen
-* Teste ut restructure-funksjonen
 * Lenker til manage-siden og tilbake
 * Optimalisere visningen av filmer
 

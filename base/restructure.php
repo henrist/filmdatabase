@@ -8,12 +8,19 @@ class hs_filmdb_restructure
 	protected $os;
 	
 	/**
+	 * @var hs_filmdb
+	 */
+	protected $filmdb;
+	
+	/**
 	 * Konstruktør..
 	 */
-	public function __construct()
+	public function __construct(hs_filmdb $filmdb)
 	{
 		if (HS_FILMDB_WIN) $this->os = new hs_filmdb_restructure_os_win();
 		else $this->os = new hs_filmdb_restructure_os_other();
+		
+		$this->filmdb = $filmdb;
 	}
 	
 	/**
@@ -25,6 +32,11 @@ class hs_filmdb_restructure
 		{
 			throw new Exception("Ugyldig inndata.");
 		}
+		
+		$dir = $this->filmdb->set->index_dir;
+		$dirtemp = $this->filmdb->set->index_dir_temp;
+		$newdir = $this->filmdb->set->index_new_dir;
+		$newdirtemp = $this->filmdb->set->index_new_dir_temp;
 		
 		// opprett filmindeks-mappa
 		$this->os->dir_mk($dirtemp);
@@ -85,6 +97,9 @@ class hs_filmdb_restructure
 			// fiks ugyldige navn
 			$name = preg_replace("/[\\\\\\/:*?\"<>|]/", "", $name);
 			
+			// sørg for korrekt koding
+			if ($this->os->type == "other") $name = utf8_encode($name);
+			
 			// sett opp alternativt navn
 			$name_org = $name;
 			$x = 2;
@@ -101,7 +116,7 @@ class hs_filmdb_restructure
 <p>Symlink feilet: '.$film->path.' til '.$dir.'\\'.$name.'</p>';
 			}*/
 			
-			$this->os->dir_link($dirtemp."/".$namem, $film->path);
+			$this->os->dir_link($dirtemp."/".$name, $film->path);
 			
 			echo $dir."/".$name."\n";
 			
@@ -146,24 +161,25 @@ interface hs_filmdb_restructure_os {
 
 
 class hs_filmdb_restructure_os_win implements hs_filmdb_restructure_os {
+	public $type = "win";
 	public function dir_mk($dir)
 	{
-		shell_exec("mkdir \"".escapeshellarg($dir)."\"");
+		shell_exec("mkdir ".escapeshellarg($dir));
 	}
 	
 	public function dir_rm($dir)
 	{
-		shell_exec("rmdir /S /Q \"".escapeshellarg($dir)."\"");
+		shell_exec("rmdir /S /Q ".escapeshellarg($dir));
 	}
 	
 	public function dir_mv($dir, $newdir)
 	{
-		shell_exec("move /Y \"".escapeshellarg($dir)."\" \"".escapeshellarg($newdir)."\"");
+		shell_exec("move /Y ".escapeshellarg($dir)." ".escapeshellarg($newdir));
 	}
 	
 	public function dir_link($dir_as_link, $target)
 	{
-		shell_exec("mklink /D \"".escapeshellarg($dir_as_link)."\" \"".escapeshellarg($target)."\"");
+		shell_exec("mklink /D ".escapeshellarg($dir_as_link)." ".escapeshellarg($target));
 	}
 	
 	public function file_touch($file)
@@ -173,6 +189,7 @@ class hs_filmdb_restructure_os_win implements hs_filmdb_restructure_os {
 }
 
 class hs_filmdb_restructure_os_other implements hs_filmdb_restructure_os {
+	public $type = "other";
 	public function dir_mk($dir)
 	{
 		mkdir($dir);
@@ -180,7 +197,7 @@ class hs_filmdb_restructure_os_other implements hs_filmdb_restructure_os {
 	
 	public function dir_rm($dir)
 	{
-		shell_exec("rm -Rf \"".escapeshellarg($dir)."\"");
+		shell_exec("rm -Rf ".escapeshellarg($dir));
 	}
 	
 	public function dir_mv($dir, $newdir)

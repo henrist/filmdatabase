@@ -76,11 +76,17 @@ if (isset($_GET['poster']))
 	die;
 }
 
-/*// bygge opp mappestruktur på nytt?
+// bygge opp mappestruktur på nytt?
 elseif (isset($_GET['restructure']))
 {
-	self::restructure();
-}*/
+	require "base/restructure.php";
+	$restructure = new hs_filmdb_restructure($filmdb);
+	
+	// hent inn data
+	$filmer = $filmdb->get_all_movies_grouped();
+	
+	$restructure->restructure($filmer);
+}
 
 // manage?
 elseif (isset($_GET['manage']))
