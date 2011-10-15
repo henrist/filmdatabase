@@ -2,3 +2,6 @@
 .buildpath
 .settings/
 base/config.php
+imdb_http.log
+.filmdata-data-cache
+.filmdata-path-id-cache
