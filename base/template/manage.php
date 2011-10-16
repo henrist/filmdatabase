@@ -14,8 +14,12 @@ foreach ($filmer['indexed'] as $film)
 array_multisort($t_n, $filmer['indexed']);
 
 echo '
-<h1>Indekserte filmer</h1>
-<p><a href=".">Vis søkbar liste &raquo;</a></p>
+<h1>Filmdatabase</h1>
+<ul>
+	<li><a href=".">Vis søkbar liste &raquo;</a></li>
+	<li><a href="?restructure">Restrukturer mappe på disk &raquo;</a></li>
+</ul>
+<h2>Indekserte filmer</h2>
 <p>Antall: '.count($filmer['indexed']).'</p>
 <p id="showposters"><a href="#">Vis posters for filmene</a></p>
 <table class="table">
@@ -103,7 +107,7 @@ window.addEvent("domready", function()
 });';
 
 echo '
-<h1>Filmer som ikke er indeksert enda</h1>
+<h2>Filmer som ikke er indeksert enda</h2>
 <table class="table">
 	<thead>
 		<tr>
@@ -132,7 +136,7 @@ echo '
 </table>';
 
 echo '
-<h1>Filmer som har feilet indeksering</h1>
+<h2>Filmer som har feilet indeksering</h2>
 <table class="table">
 	<thead>
 		<tr>
