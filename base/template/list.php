@@ -112,6 +112,9 @@ window.addEvent("domready", function()
 	filmdata.genres_count = ' . js_encode($js_genres_count) . ';
 	filmdata.actors = ' . js_encode($js_actors) . ';
 	filmdata.init();
+	
+	new OverText(document.id("dur_from"));
+	new OverText(document.id("dur_to"));
 });';
 
 $template->css .= '
@@ -130,7 +133,7 @@ $ret = '
 	</p>
 	<p class="genre_wrap"><span class="genre_pre"><b>Må inneholde sjangerene:</b></span> <span id="genres_positive" class="genres_boxes"></span></p>
 	<p class="genre_wrap"><span class="genre_pre"><b>Kan ikke inneholde sjangerene:</b></span> <span id="genres_negative" class="genres_boxes"></span></p>
-	<p><b>Årstall:</b>
+	<p><span class="filmdb_filter_name"><b>Årstall:</b></span>
 		<input type="text" id="year" class="yearinput styled" style="width: 50px" />
 		<span id="year2c" class="hide"> - <input type="text" id="year2" class="yearinput styled" style="width: 50px" /></span>
 		<span class="year_options">
@@ -140,10 +143,14 @@ $ret = '
 			<input type="radio" name="yeartype" value="between" id="yearbetween" /><label for="yearbetween"> Mellom</label>
 		</span>
 	</p>
-	<p><b>Skuespiller:</b>
+	<p><span class="filmdb_filter_name"><b>Varighet:</b></span>
+		<input type="text" id="dur_from" class="duration styled" title="minst" /> -
+		<input type="text" id="dur_to" class="duration styled" title="lengst" />
+	</p>
+	<p><span class="filmdb_filter_name"><b>Skuespiller:</b></span>
 		<input type="text" id="actor" class="styled" />
 	</p>
-	<p><b>Kvalitet:</b>
+	<p><span class="filmdb_filter_name"><b>Kvalitet:</b></span>
 		<span class="type_options">
 			<input type="checkbox" name="type_1080" id="type_1080" value="1080" /><label for="type_1080"> 1080</label>
 			<input type="checkbox" name="type_720" id="type_720" value="720" /><label for="type_720"> 720</label>

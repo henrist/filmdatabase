@@ -169,7 +169,13 @@ form { margin: 0 }
 
 
 
-
+.filmdb_filter_name {
+	min-width: 100px;
+	display: inline-block;
+}
+input.duration {
+	width: 60px;
+}
 
 
 

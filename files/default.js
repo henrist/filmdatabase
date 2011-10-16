@@ -14,7 +14,9 @@ var filmdata = {
 		year2: "",
 		keywords: "",
 		actors: null,
-		type: null
+		type: null,
+		dur_from: "",
+		dur_to: ""
 	},
 	filmer: null,
 	init: function()
@@ -140,6 +142,31 @@ var filmdata = {
 				// kjør filter om nødvendig
 				self.check_year();
 			});
+		});
+		
+		// varighet
+		var dur_fromf = function() {
+			// endret seg?
+			if (self.active_filter.dur_from != this.get("value")) {
+				self.active_filter.dur_from = parseInt(this.get("value"));
+				self.run_filter();
+			}
+		};
+		$("dur_from").addEvents({
+			"keyup": dur_fromf,
+			"change": dur_fromf
+		});
+		
+		var dur_tof = function() {
+			// endret seg?
+			if (self.active_filter.dur_to != this.get("value")) {
+				self.active_filter.dur_to = parseInt(this.get("value"));
+				self.run_filter();
+			}
+		};
+		$("dur_to").addEvents({
+			"keyup": dur_tof,
+			"change": dur_tof
 		});
 		
 		// kvalitet/type
@@ -349,6 +376,14 @@ var filmdata = {
 						show = data["year"] >= self.active_filter.year && data["year"] <= self.active_filter.year2;
 					break;
 				}
+			}
+			
+			// søk varighet?
+			if (show && self.active_filter.dur_from) {
+				show = data["runtime"] >= self.active_filter.dur_from;
+			}
+			if (show && self.active_filter.dur_to) {
+				show = data["runtime"] <= self.active_filter.dur_to;
 			}
 			
 			// søk nøkkelord?
