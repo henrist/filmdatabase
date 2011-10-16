@@ -123,8 +123,8 @@ class hs_filmdb_film
 		}
 		
 		// rating
-		$m = preg_match('~<b>([0-9\\.]+)</b>.*\\n.+?href="ratings"[^>]+>(.+?) votes~', $this->imdb_data, $r);
-		if (!$m) $m = preg_match('~<b>([0-9\\.]+)/10</b>.+?>([0-9,]+) votes~s', $this->imdb_data, $r);
+		$m = preg_match('~ratingValue">([0-9\\.]+)<.*\\n.+?ratingCount">(.+?)<~', $this->imdb_data, $r);
+		//if (!$m) $m = preg_match('~<b>([0-9\\.]+)/10</b>.+?____>([0-9,]+) votes~s', $this->imdb_data, $r);
 		if ($m)
 		{
 			$this->cache['rating'] = (float) $r[1];
@@ -438,7 +438,7 @@ class hs_filmdb_film
 		$this->build_cache_poster($rebuild);
 		
 		// sjekk for metadata
-		$this->get_movie_details();
+		$this->get_movie_details(false);
 		
 		return true;
 	}
@@ -666,7 +666,7 @@ class hs_filmdb_film
 		if (!$res)
 		{
 			// generer cache
-			$this->filmdb->cache_set($this);
+			$this->filmdb->cache_set($this, $cache);
 		}
 		
 		else
