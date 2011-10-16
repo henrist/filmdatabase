@@ -107,7 +107,8 @@ class hs_filmdb_film
 		$r = null;
 		
 		// tittel og år
-		if (preg_match("~<title>(.+?) \\(.*(\\d{4})\\)( - IMDb)?</title>~i", $this->imdb_data, $r))
+		//if (preg_match("~<title>(.+?) \\(.*(\\d{4})\\)( - IMDb)?</title>~i", $this->imdb_data, $r))
+		if (preg_match("~og:title\" content=\"(.+?) \\(.*(\\d{4})\\)\"/>~i", $this->imdb_data, $r))
 		{
 			$this->cache['title'] = str_replace("&#x27;", "'", strip_tags(html_entity_decode($r[1])));
 			$this->cache['year'] = (int) $r[2];
