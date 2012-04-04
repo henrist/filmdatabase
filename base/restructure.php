@@ -35,6 +35,8 @@ class hs_filmdb_restructure
 		
 		$dir = $this->filmdb->set->index_dir;
 		$dirtemp = $this->filmdb->set->index_dir_temp;
+		$hddir = $this->filmdb->set->index_hd_dir;
+		$hddirtemp = $this->filmdb->set->index_hd_dir_temp;
 		$newdir = $this->filmdb->set->index_new_dir;
 		$newdirtemp = $this->filmdb->set->index_new_dir_temp;
 		
@@ -42,6 +44,10 @@ class hs_filmdb_restructure
 		$this->os->dir_mk($dirtemp);
 		$this->os->dir_mk($dirtemp."/-- MERK1 -- FORBEHOLD OM FEIL INDEKSERING -- TITTEL KAN FRAVIKE --");
 		$this->os->dir_mk($dirtemp."/-- MERK2 -- ALLE TITLER OG AARSTALL ER HENTET FRA IMDB --");
+		
+		// opprett HD-filmindeks-mappa
+		$this->os->dir_mk($hddirtemp);
+		$this->os->file_touch($hddirtemp."/-- MERK1 -- HENT FILMEN FRA HOVEDMAPPA, DETTE ER KUN INFO --");
 		
 		// opprett mappe for nye filmer
 		$this->os->dir_mk($newdirtemp);
@@ -53,6 +59,8 @@ class hs_filmdb_restructure
 		echo '<pre>';
 		
 		$new_expire = time()-86400*10; // hvor langt tilbake skal vi lage indeks for nye filmer
+		
+		$names = array();
 		
 		// sett opp lenkene
 		$i = 0;
@@ -84,9 +92,16 @@ class hs_filmdb_restructure
 			$name = str_replace("&#x27;", "'", $name);
 			
 			// legg til 720 eller 1080 i tittelen
-			if (preg_match("/(1080|720)-U?KOMP/", $film->path, $matches))
+			$hd = false;
+			if (preg_match("/(1080-U?KOMP|Filmer-1080)/", $film->path))
 			{
-				$name .= " [{$matches[1]}]";
+				$name .= " [1080]";
+				$hd = true;
+			}
+			elseif (preg_match("/(720-U?KOMP|Filmer-720)/", $film->path))
+			{
+				$name .= " [720]";
+				$hd = true;
 			}
 			
 			#$name .= " (".$data['video'][0]['width']."x".$data['video'][0]['height'].")";
@@ -103,7 +118,7 @@ class hs_filmdb_restructure
 			// sett opp alternativt navn
 			$name_org = $name;
 			$x = 2;
-			while (file_exists($dirtemp."/".$name))
+			while (file_exists($dirtemp."/".$name) || in_array($name, $names))
 			{
 				$name = $name_org . " ($x)";
 				$x++;
@@ -117,6 +132,7 @@ class hs_filmdb_restructure
 			}*/
 			
 			$this->os->dir_link($dirtemp."/".$name, $film->path);
+			$names[] = $name;
 			
 			echo $dir."/".$name."\n";
 			
@@ -130,6 +146,13 @@ class hs_filmdb_restructure
 				$this->os->file_touch($newdirtemp."/".$t."   $r   $name");
 			}
 			
+			// HD?
+			if ($hd)
+			{
+				$r = number_format((float) $film->get("rating"), 1, ",", "");
+				$this->os->file_touch($hddirtemp."/".$name_org." (rating=$r)");
+			}
+			
 			$i++;
 		}
 		
@@ -137,10 +160,12 @@ class hs_filmdb_restructure
 		
 		// slett filmindeks-mappa
 		$this->os->dir_rm($dir);
+		$this->os->dir_rm($hddir);
 		$this->os->dir_rm($newdir);
 		
 		// flytt temp-mappa
 		$this->os->dir_mv($dirtemp, $dir);
+		$this->os->dir_mv($hddirtemp, $hddir);
 		$this->os->dir_mv($newdirtemp, $newdir);
 		
 		echo '
@@ -184,7 +209,7 @@ class hs_filmdb_restructure_os_win implements hs_filmdb_restructure_os {
 	
 	public function file_touch($file)
 	{
-		file_put_contents($file, "", FILE_APPEND);
+		file_put_contents($file, "dummy", FILE_APPEND);
 	}
 }
 
@@ -212,6 +237,6 @@ class hs_filmdb_restructure_os_other implements hs_filmdb_restructure_os {
 	
 	public function file_touch($file)
 	{
-		file_put_contents($file, "", FILE_APPEND);
+		file_put_contents($file, "dummy", FILE_APPEND);
 	}
 }

@@ -133,7 +133,7 @@ class hs_filmdb_film
 		}
 		
 		// genre
-		if (preg_match_all('~<a href="/(?:genre|Sections/Genres)/.+?">([a-z\\-]+)</a>~i', $this->imdb_data, $r))
+		if (preg_match_all('~<a.+?href="/(?:genre|Sections/Genres)/.+?".+?>([a-z\\-]+)</a>~is', $this->imdb_data, $r))
 		{
 			$this->cache['genres'] = $r[1];
 		}

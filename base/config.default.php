@@ -38,6 +38,16 @@ class hs_filmdb_set
 	public $index_dir_temp = "C:\FILMINDEKS-TEMP";
 	
 	/**
+	 * Mappe for HD-indeks
+	 */
+	public $index_hd_dir = "C:\\FILMINDEKS";
+	
+	/**
+	 * Midlertidig mappe for HD-indeks (blir opprettet og slettet automatisk)
+	 */
+	public $index_hd_dir_temp = "C:\FILMINDEKS-TEMP";
+	
+	/**
 	 * Mappe for indeks over siste filmer
 	 */
 	public $index_new_dir = "C:\\FILMINDEKS-NYE";

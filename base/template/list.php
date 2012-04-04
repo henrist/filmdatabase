@@ -70,10 +70,29 @@ foreach ($filmer['indexed'] as $film)
 	else $actors_id = array();
 	
 	// DVDR, 720 eller 1080?
+	#$type = "";
+	#if (preg_match("/(DVDR|1080|720)-U?KOMP/", $film->path, $matches))
+	#{
+	#	$type = $matches[1];
+	#}
+	#elseif (preg_match("/Filmer-(1080|720)/", $film->path, $matches))
+	#{
+	#	$type = $matches[1];
+	#}
+	
+	// legg til 720 eller 1080 i tittelen
 	$type = "";
-	if (preg_match("/(DVDR|1080|720)-U?KOMP/", $film->path, $matches))
+	if (preg_match("/(1080-U?KOMP|Filmer-1080)/", $film->path))
 	{
-		$type = $matches[1];
+		$type .= "1080";
+	}
+	elseif (preg_match("/(720-U?KOMP|Filmer-720)/", $film->path))
+	{
+		$type .= "720";
+	}
+	elseif (preg_match("/(DVDR-U?KOMP|Filmer-DVDR)/", $film->path))
+	{
+		$type .= "DVDR";
 	}
 	
 	$js_data[$film->path_id] = array(
@@ -215,7 +234,7 @@ foreach ($js_data as $id => $data)
 	
 	// DVDR, 720 eller 1080?
 	$res = "";
-	if (preg_match("/(DVDR|1080|720)-U?KOMP/", $film->path, $matches))
+	if (preg_match("/(DVDR|1080|720)-U?KOMP/", $film->path, $matches) || preg_match("/Filmer-(DVDR|720|1080)/", $film->path, $matches))
 	{
 		$res = '<b>['.$matches[1].']</b>';
 	}
