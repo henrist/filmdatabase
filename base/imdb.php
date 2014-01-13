@@ -31,7 +31,7 @@ class hs_filmdb_imdb {
 		$ret = array();
 		
 		$matches = array();
-		preg_match_all('~<a href="/title/(tt[0-9]+)/".+?>(.+?)</a>~i', $data['content'], $matches, PREG_SET_ORDER);
+		preg_match_all('~<a href="/title/(tt[0-9]+)/.+?" >(.+?)</a>~i', $data['content'], $matches, PREG_SET_ORDER);
 		
 		$i = 0;
 		$id_list = array();

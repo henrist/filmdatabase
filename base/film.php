@@ -108,15 +108,15 @@ class hs_filmdb_film
 		
 		// tittel og år
 		//if (preg_match("~<title>(.+?) \\(.*(\\d{4})\\)( - IMDb)?</title>~i", $this->imdb_data, $r))
-		if (preg_match("~og:title\" content=\"(.+?) \\(.*(\\d{4})\\)\"/>~i", $this->imdb_data, $r))
+		if (preg_match("~og:title' content=\"(.+?) \\(.*(\\d{4})\\)\"~i", $this->imdb_data, $r))
 		{
 			$this->cache['title'] = str_replace("&#x27;", "'", strip_tags(html_entity_decode($r[1])));
 			$this->cache['year'] = (int) $r[2];
 		}
 		
 		// coverinfo (poster)
-		$m = preg_match("~href=\"(/media/rm[^\"]+)\".+?src=\"([^\"]+)~", $this->imdb_data, $r); // ny versjon
-		if (!$m) $m = preg_match("~<a name=\"poster\" href=\"([^\"]+)\".+?src=\"([^\"]+)~", $this->imdb_data, $r); // gammel versjon
+		$m = preg_match("~img_primary.+?href=\"(/media/rm[^\"]+)\".+?src=\"([^\"]+)~s", $this->imdb_data, $r); // ny versjon
+		//if (!$m) $m = preg_match("~<a name=\"poster\" href=\"([^\"]+)\".+?src=\"([^\"]+)~", $this->imdb_data, $r); // gammel versjon
 		if ($m)
 		{
 			$this->cache['poster_href'] = $r[1];
@@ -124,7 +124,7 @@ class hs_filmdb_film
 		}
 		
 		// rating
-		$m = preg_match('~ratingValue">([0-9\\.]+)<.*\\n.+?ratingCount">(.+?)<~', $this->imdb_data, $r);
+		$m = preg_match('~ratingValue">([0-9\\.]+)<.*ratingCount">(.+?)<~', $this->imdb_data, $r);
 		//if (!$m) $m = preg_match('~<b>([0-9\\.]+)/10</b>.+?____>([0-9,]+) votes~s', $this->imdb_data, $r);
 		if ($m)
 		{
@@ -139,10 +139,10 @@ class hs_filmdb_film
 		}
 		
 		// director
-		if (preg_match('~(?:<h4[^\\n]+\\n +Director:|<div id="director-info).+?</div>~s', $this->imdb_data, $r))
+		if (preg_match('~(?:itemprop="director").+?</div>~s', $this->imdb_data, $r))
 		#if (preg_match('~<div id="director-info.+?</div>~s', $this->imdb_data, $r))
 		{
-			if (preg_match_all('~<a +href="/name/([^/]+)/[^>]+>([^<]+)</a~', $r[0], $r2))
+			if (preg_match_all('~<a +href="/name/([^/]+)/.+?itemprop="name">([^<]+)</span~', $r[0], $r2))
 			{
 				$this->cache['directors_name_id'] = $r2[1];
 				$this->cache['directors'] = $r2[2];
@@ -150,9 +150,10 @@ class hs_filmdb_film
 		}
 		
 		// credits
-		if (preg_match('~(?:<h4[^\\n]+\\n +Writers?:|<h5>Writers).+?</div>~s', $this->imdb_data, $r))
+		if (preg_match('~(?:itemprop="creator").+?</div>~s', $this->imdb_data, $r))
 		{
-			if (preg_match_all('~<a +href="/name/([^/]+)/[^>]+>([^<]+)</a>(?: \\(([^\\)]+)\\))?~', $r[0], $r2))
+			#if (preg_match_all('~<a +href="/name/([^/]+)/[^>]+>([^<]+)</a>(?: \\(([^\\)]+)\\))?~', $r[0], $r2))
+			if (preg_match_all('~<a +href="/name/([^/]+)/.+?itemprop="name">([^<]+)</span></a> +(?:\\(([^\\)]+)\\))~', $r[0], $r2))
 			{
 				$this->cache['credits_name_id'] = $r2[1];
 				$this->cache['credits'] = $r2[2];
@@ -163,22 +164,15 @@ class hs_filmdb_film
 		// actors og characters (cast)
 		if (preg_match('~<table class="cast(_list)?">.+?</table>~s', $this->imdb_data, $r))
 		{
-			if (preg_match_all('~"nm"><a href="/name/([^/]+)/[^>]+>([^<]+)</a>.+?"char">(.+?)</td>~', $r[0], $r2))
-			{
-				$this->cache['actors_name_id'] = $r2[1];
-				$this->cache['actors'] = $r2[2];
-				$this->cache['characters'] = $r2[3];
-			}
-			
-			elseif (preg_match_all('~<tr.+?</tr>~s', $r[0], $r3, PREG_SET_ORDER))
+			if (preg_match_all('~<tr.+?</tr>~s', $r[0], $r3, PREG_SET_ORDER))
 			{
 				foreach ($r3 as $r)
 				{
-					if (preg_match('~"/name/([^/]+)/[^>]+>([^<]+)</a>.+?/character/[^/]+/">([^<]+)~s', $r[0], $r2))
+					if (preg_match('~"/name/([^/]+)/.+?"name">([^<]+).+?(<td class="character".+?</td>)~s', $r[0], $r2))
 					{
 						$this->cache['actors_name_id'][] = $r2[1];
 						$this->cache['actors'][] = $r2[2];
-						$this->cache['characters'][] = $r2[3];
+						$this->cache['characters'][] = trim(strip_tags($r2[3]));
 					}
 				}
 			}
@@ -193,9 +187,9 @@ class hs_filmdb_film
 		}
 		
 		// plot keywords
-		if (preg_match('~(?:<h4 class="inline">Plot Keywords|<h5>Plot Keywords).+?</div>~s', $this->imdb_data, $r))
+		if (preg_match('~(?:<h4 class="inline">Plot Keywords).+?</div>~s', $this->imdb_data, $r))
 		{
-			if (preg_match_all('~<a href="/keyword/([^/]+)/?">([^<]+)</a>~', $r[0], $r2))
+			if (preg_match_all('~<a href="/keyword/([^/]+)/?">(.+?)</span>~', $r[0], $r2))
 			{
 				$this->cache['keywords'] = $r2[2];
 			}
@@ -240,7 +234,7 @@ class hs_filmdb_film
 			$this->cache['aka'][] = trim($r[1]);
 			$this->cache['aka_lang'][] = isset($r[2]) ? trim($r[2]) : null;
 		}
-		
+
 		// cache tid: hent ut tredje linja
 		$lines = explode("\n", $this->imdb_data, 4);
 		$time = strtotime(trim($lines[2]));
@@ -384,6 +378,7 @@ class hs_filmdb_film
 		// hent ut ID for filmen
 		$id = $this->get_imdb_id($cache, $save, true);
 		if (!$id) return false;
+		
 		
 		// hent data
 		$data = hs_filmdb_imdb::get_imdb_data($id);
