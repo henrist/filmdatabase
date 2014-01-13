@@ -93,12 +93,12 @@ class hs_filmdb_restructure
 			
 			// legg til 720 eller 1080 i tittelen
 			$hd = false;
-			if (preg_match("/(1080-U?KOMP|Filmer-1080)/", $film->path))
+			if (preg_match("/\\/(1080-U?KOMP|Filmer-1080|1080)\\//", $film->path))
 			{
 				$name .= " [1080]";
 				$hd = true;
 			}
-			elseif (preg_match("/(720-U?KOMP|Filmer-720)/", $film->path))
+			elseif (preg_match("/\\/(720-U?KOMP|Filmer-720|720)\\//", $film->path))
 			{
 				$name .= " [720]";
 				$hd = true;

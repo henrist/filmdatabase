@@ -82,15 +82,15 @@ foreach ($filmer['indexed'] as $film)
 	
 	// legg til 720 eller 1080 i tittelen
 	$type = "";
-	if (preg_match("/(1080-U?KOMP|Filmer-1080)/", $film->path))
+	if (preg_match("/\\/(1080-U?KOMP|Filmer-1080|1080)\\//", $film->path))
 	{
 		$type .= "1080";
 	}
-	elseif (preg_match("/(720-U?KOMP|Filmer-720)/", $film->path))
+	elseif (preg_match("/\\/(720-U?KOMP|Filmer-720|720)\\//", $film->path))
 	{
 		$type .= "720";
 	}
-	elseif (preg_match("/(DVDR-U?KOMP|Filmer-DVDR)/", $film->path))
+	elseif (preg_match("/\\/(DVDR-U?KOMP|Filmer-DVDR|dvdr)\\//i", $film->path))
 	{
 		$type .= "DVDR";
 	}
@@ -234,7 +234,7 @@ foreach ($js_data as $id => $data)
 	
 	// DVDR, 720 eller 1080?
 	$res = "";
-	if (preg_match("/(DVDR|1080|720)-U?KOMP/", $film->path, $matches) || preg_match("/Filmer-(DVDR|720|1080)/", $film->path, $matches))
+	if (preg_match("/\\/(DVDR|1080|720)(-U?KOMP)?\\//i", $film->path, $matches) || preg_match("/Filmer-(DVDR|720|1080)/", $film->path, $matches))
 	{
 		$res = '<b>['.$matches[1].']</b>';
 	}
