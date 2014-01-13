@@ -52,13 +52,13 @@ class hs_filmdb_restructure
 		// opprett mappe for nye filmer
 		$this->os->dir_mk($newdirtemp);
 		$this->os->file_touch($newdirtemp."/-- MERK1 -- DETTE ER EN OVERSIKT OVER NYESTE FILMER LAGT TIL --");
-		$this->os->file_touch($newdirtemp."/-- MERK2 -- FILMER LAGT INN FOR MER ENN 10 DAGER SIDEN FJERNES VED INDEKSERING --");
+		$this->os->file_touch($newdirtemp."/-- MERK2 -- FILMER LAGT INN FOR MER ENN 20 DAGER SIDEN FJERNES VED INDEKSERING --");
 		$this->os->file_touch($newdirtemp."/-- MERK3 -- HENT FILMEN FRA HOVEDMAPPA, DETTE ER KUN INFO --");
 		
 		
 		echo '<pre>';
 		
-		$new_expire = time()-86400*10; // hvor langt tilbake skal vi lage indeks for nye filmer
+		$new_expire = time()-86400*20; // hvor langt tilbake skal vi lage indeks for nye filmer
 		
 		$names = array();
 		
