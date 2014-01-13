@@ -343,7 +343,7 @@ var filmdata = {
 			if (show && self.active_filter.title)
 			{
 				var value = self.active_filter.title.replace(/  */g, ".*");
-				if (!data["title"].test(value, "i"))
+				if (!data["title"] || !data["title"].test(value, "i"))
 				{
 					show = false;
 					
