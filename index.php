@@ -51,7 +51,7 @@ if (isset($_GET['indexs']))
 	}
 	
 	$film->build_cache(true);
-	echo "Indekserte " . $film->get("title") . " (".$film->get("year").")";
+	echo "Indekserte " . $film->get("title") . " (".$film->get("year").')<br /><img src="?poster='.$film->path_id.'" alt="" />';
 	
 	die;
 }
