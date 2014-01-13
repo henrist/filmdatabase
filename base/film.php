@@ -72,11 +72,12 @@ class hs_filmdb_film
 	public function load_cache($cache = true, $save = true)
 	{
 		// forsøk og hent global cache
-		if ($save || $cache)
+		if ($cache)
 		{
-			if ($this->cache_global_load($cache)) return;
+			if ($this->cache_global_load()) return;
 		}
 		
+		// lokal cache
 		$path = $this->path."/".self::FILE_IMDB_CACHE_S;
 		if ($cache && file_exists($path))
 		{
@@ -84,13 +85,16 @@ class hs_filmdb_film
 			return;
 		}
 		
-		// parse
+		// generer metadata
 		$this->parse_cache();
 		
 		// har vi cache å lagre?
 		if ($this->cache && $save)
 		{
 			file_put_contents($path, serialize($this->cache));
+			
+			// generer global cache
+			// FIXME $this->filmdb->cache_set($this);
 		}
 	}
 	
@@ -436,6 +440,9 @@ class hs_filmdb_film
 		// sjekk for metadata
 		$this->get_movie_details(false);
 		
+		// lagre global cache
+		$this->filmdb->cache_set($this);
+		
 		return true;
 	}
 	
@@ -568,7 +575,7 @@ class hs_filmdb_film
 	/**
 	 * Forsøk å finn detaljer om filmfilen i filmmappen
 	 */
-	public function get_movie_details($cache = true, $save = true)
+	public function get_movie_details($cache = true, $save = true, $global_cache = true)
 	{
 		if ($this->cache_movie !== null)
 		{
@@ -576,12 +583,12 @@ class hs_filmdb_film
 		}
 		
 		// forsøk og hent global cache
-		if ($save || $cache)
+		if ($cache && $global_cache)
 		{
 			if ($this->cache_global_load($cache)) return $this->cache_movie;
 		}
 		
-		// sjekk for cache
+		// sjekk for lokal cache
 		$path = $this->path."/".self::FILE_MOVIE_METADATA;
 		if ($cache && file_exists($path))
 		{
@@ -651,27 +658,23 @@ class hs_filmdb_film
 	/**
 	 * Hent info fra global cache
 	 */
-	public function cache_global_load($cache = true)
+	public function cache_global_load()
 	{
 		static $is_loading = false;
 		if ($is_loading) return false; // avoid recursive calls
 		$is_loading = true;
 		
 		// forsøk og last inn cache
-		$res = $cache ? $this->filmdb->cache_get($this->path_id) : null;
-		if (!$res)
-		{
-			// generer cache
-			$this->filmdb->cache_set($this, $cache);
-		}
-		
-		else
+		$res = $this->filmdb->cache_get($this->path_id);
+		if ($res)
 		{
 			$this->cache_movie = $res['movie_details'];
 			$this->cache = $res['imdb'];
 		}
 		
 		$is_loading = false;
+		
+		if (!$res) return false;
 		return true;
 	}
 }

@@ -269,15 +269,15 @@ class hs_filmdb
 	/**
 	 * Lagre cache for metadata for en spesifikk film
 	 */
-	public function cache_set(hs_filmdb_film $film, $use_cache)
+	public function cache_set(hs_filmdb_film $film)
 	{
 		if ($this->metadata_cache === null) $this->cache_load();
 		
-		if ($film->cache === null) $film->load_cache($use_cache);
+		if ($film->cache === null) $film->load_cache(false);
 		
 		$this->metadata_cache[$film->path_id] = array(
 			"cache_time" => time(),
-			"movie_details" => $film->get_movie_details($use_cache),
+			"movie_details" => $film->get_movie_details(true, true, false),
 			"imdb" => $film->cache
 		);
 		
