@@ -1,10 +1,18 @@
-<?php
+<?php namespace henrist\FilmDB;
 
-require "base/base.php";
+require "vendor/autoload.php";
+
+set_time_limit(0);
+define("HS_FILMDB_WIN", stripos(PHP_OS, 'win') !== false);
+
+$filmdb = new FilmDB();
+$filmdb->init();
 
 // last inn template
 require "base/template/template.php";
-$template = new hs_filmdb_template();
+$template = new \hs_filmdb_template();
+
+
 
 /*if (isset($_GET['reindex']) || (isset($_SERVER['argv'][1]) && $_SERVER['argv'][1] == "reindex"))
 {
@@ -19,20 +27,20 @@ $template = new hs_filmdb_template();
 	ob_implicit_flush(true);
 	ob_end_flush();
 	$filmer = hs_imdbdata::get_all_movies_grouped();
-	
+
 	echo "Starting indexing...\n";
-	
+
 	$i = 0;
 	foreach ($filmer['unknown'] as $film)
 	{
 		if ($i++ == 20) break;
-		
+
 		echo ".. ";
 		$film->build_cache();
-		
+
 		echo "Indexed " . $film->get("title") . " (".$film->get("year").")\n";
 	}
-	
+
 	echo "Finished";
 	die;
 }*/
@@ -42,17 +50,17 @@ if (isset($_GET['indexs']))
 {
 	$film = $filmdb->get_movie_by_pathid($_GET['indexs']);
 	if (!$film) die("Fant ikke filmen.");
-	
+
 	// har vi gitt imdb-id?
 	if (isset($_POST['imdb_id']) && !empty($_POST['imdb_id']))
 	{
 		if (!preg_match("/^tt\\d{7}$/", $_POST['imdb_id'])) die("Ugyldig IMDB-ID.");
 		$film->set_imdb_id($_POST['imdb_id']);
 	}
-	
+
 	$film->build_cache(true);
 	echo "Indekserte " . $film->get("title") . " (".$film->get("year").')<br /><img src="?poster='.$film->path_id.'" alt="" />';
-	
+
 	die;
 }
 
@@ -62,16 +70,16 @@ if (isset($_GET['indexs']))
 if (isset($_GET['poster']))
 {
 	$film = $filmdb->get_movie_by_pathid($_GET['poster']);
-	
+
 	if ($film && ($poster = $film->get_poster_data()))
 	{
 		header("Content-Type: image/jpeg");
 		header("Content-Length: ".strlen($poster));
-		
+
 		echo $poster;
 		die;
 	}
-	
+
 	header("HTTP/1.1 404 Not Found");
 	die;
 }
@@ -80,11 +88,11 @@ if (isset($_GET['poster']))
 elseif (isset($_GET['restructure']))
 {
 	require "base/restructure.php";
-	$restructure = new hs_filmdb_restructure($filmdb);
-	
+	$restructure = new Restructure($filmdb);
+
 	// hent inn data
 	$filmer = $filmdb->get_all_movies_grouped();
-	
+
 	$restructure->restructure($filmer);
 }
 
@@ -113,35 +121,35 @@ $template->render();
 		// hvor lenge skal vi beholde index?
 		$max_age = 2592000; // 30 dager
 		$limit = time() - $max_age;
-		
+
 		header("Content-Type: text/plain");
 		ob_implicit_flush(true);
 		ob_end_flush();
 		$filmer = hs_imdbdata::get_all_movies_grouped();
-		
+
 		echo "Starting reindexing...\n";
-		
+
 		$i = 0;
 		foreach ($filmer['indexed'] as $film)
 		{
 			// skal denne behandles?
 			if ($film->get_cache_time() >= $limit) continue;
-			
+
 			#if ($i++ == 50) break;
 			$i++;
-			
+
 			if ($i > 1)
 			{
 				echo 'sleep ';
 				usleep(10000000);
-			} 
-			
+			}
+
 			echo "fetching.. ";
 			$film->build_cache(true);
-			
+
 			echo "Indexed " . $film->get("title") . " (".$film->get("year").")\n";
 		}
-		
+
 		echo "Finished";
 		die;
 	}
