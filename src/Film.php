@@ -36,7 +36,7 @@ class Film
             $this->path_name = $this->path;
         }
 
-        $this->path_id = substr(md5($this->path), 0, 15);
+        $this->path_id = 'f'.substr(md5($this->path), 0, 15);
     }
 
     /**
