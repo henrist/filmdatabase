@@ -25,21 +25,21 @@ foreach ($filmer['indexed'] as $film)
 {
 	$genres = $film->get("genres");
 	if (!$genres) $genres = array();
-	
+
 	foreach ($genres as $genre)
 	{
 		if (!in_array($genre, $js_genres)) $js_genres[] = $genre;
-		
+
 		// antall filmer i hver sjanger
 		if (!isset($js_genres_count[$genre])) $js_genres_count[$genre] = 0;
 		$js_genres_count[$genre]++;
 	}
-	
+
 	// hent filminfo
 	$data = $film->get_movie_details();
 	$codec = isset($data['video'][0]['codec_name']) ? $data['video'][0]['codec_name'] : false;
 	$res = isset($data['video'][0]['width']) ? $data['video'][0]['width']."x".$data['video'][0]['height'] : false;
-	
+
 	$norsub = false;
 	$sub = isset($data['subtitle']);
 	if (isset($data['subtitle']))
@@ -53,10 +53,10 @@ foreach ($filmer['indexed'] as $film)
 			}
 		}
 	}
-	
+
 	$keywords = $film->get("keywords");
 	if (!$keywords) $keywords = array();
-	
+
 	// hent skuespillere
 	$actors_id = $film->get("actors_name_id");
 	if ($actors_id)
@@ -68,7 +68,7 @@ foreach ($filmer['indexed'] as $film)
 		}
 	}
 	else $actors_id = array();
-	
+
 	// DVDR, 720 eller 1080?
 	#$type = "";
 	#if (preg_match("/(DVDR|1080|720)-U?KOMP/", $film->path, $matches))
@@ -79,7 +79,7 @@ foreach ($filmer['indexed'] as $film)
 	#{
 	#	$type = $matches[1];
 	#}
-	
+
 	// legg til 720 eller 1080 i tittelen
 	$type = "";
 	if (preg_match("/\\/(1080-U?KOMP|Filmer-1080|1080)\\//", $film->path))
@@ -94,7 +94,7 @@ foreach ($filmer['indexed'] as $film)
 	{
 		$type .= "DVDR";
 	}
-	
+
 	$js_data[$film->path_id] = array(
 		"plot" => "test",
 		"genres" => $genres,
@@ -115,25 +115,24 @@ foreach ($filmer['indexed'] as $film)
 		"actors" => $actors_id,
 		"type" => $type
 	);
-	
+
 	$plots[$film->path_id] = $film->get("plot");
-	
+
 	#if ($i++ == 10) break;
 }
 sort($js_genres);
 asort($js_actors);
 
 $template->js .= '
-window.addEvent("domready", function()
-{
+$(function() {
 	filmdata.data = ' . js_encode($js_data) . ';
 	filmdata.genres = ' . js_encode($js_genres) . ';
 	filmdata.genres_count = ' . js_encode($js_genres_count) . ';
 	filmdata.actors = ' . js_encode($js_actors) . ';
 	filmdata.init();
-	
-	new OverText(document.id("dur_from"));
-	new OverText(document.id("dur_to"));
+
+	// FIXME new OverText(document.id("dur_from"));
+	// FIXME new OverText(document.id("dur_to"));
 });';
 
 $template->css .= '
@@ -195,7 +194,7 @@ $felter = array(
 foreach ($felter as $id => $p)
 {
 	$k = isset($p['accesskey']) ? $p['accesskey'] : null;
-	
+
 	$ret .= '
 		<input type="checkbox" id="showcol_'.$id.'"'.(!isset($p[1]) || $p[1] ? ' checked="checked"' : '').($k ? ' accesskey="'.$k.'"' : '').' /><label for="showcol_'.$id.'"> '.$p[0].'</label>';
 }
@@ -210,28 +209,27 @@ $ret .= '
 <table class="table" id="filmer">
 	<thead>
 		<tr>
-			<th class="table-th-nosort">&nbsp;</th>
+			<th data-sorter="false" class="table-th-nosort">&nbsp;</th>
 			<th>Navn</th>
 			<th>År</th>
-			<th>Rating</th>
-			<th>Spilletid</th>
-			<th class="table-th-nosort">Sjangre</th>
-			<th>Oppløsning</th>
+			<th class="sorter-movie_rating">Rating</th>
+			<th class="sorter-movie_time">Spilletid</th>
+			<th data-sorter="false" class="table-th-nosort">Sjangre</th>
+			<th class="sorter-movie_resolution">Oppløsning</th>
 			<th>Codec</th>
 			<th>Integrert<br />undertekst?</th>
 			<th>Mappeplassering</th>
 			<th>Tid lastet inn</th>
-			<th class="table-th-nosort">Plot</th>
+			<th data-sorter="false" class="table-th-nosort">Plot</th>
 		</tr>
 	</thead>
 	<tbody>';
 
-$i = 0;
 foreach ($js_data as $id => $data)
 {
 	$film = $filmer['indexed'][$id];
 	$codec = $data['codec'] ?: "&nbsp;";
-	
+
 	// DVDR, 720 eller 1080?
 	$res = "";
 	if (preg_match("/\\/(DVDR|1080|720)(-U?KOMP)?\\//i", $film->path, $matches) || preg_match("/Filmer-(DVDR|720|1080)/", $film->path, $matches))
@@ -239,13 +237,13 @@ foreach ($js_data as $id => $data)
 		$res = '<b>['.$matches[1].']</b>';
 	}
 	$res = $data['res'] ? $data['res'] . ($res ? "<br />" . $res : "") : ($res ?: "&nbsp;");
-	
+
 	$genres = count($data['genres']) > 0 ? implode("<br />", $data['genres']) : "&nbsp;";
-	
+
 	$aka = $data['aka'] ? '<br /><span class="film-aka">'.implode("<br />", $data['aka']).'</span>' : '';
-	
+
 	$ret .= '
-		<tr'.(++$i % 2 ? ' class="table-tr-odd"' : '').' rel="'.$id.'">
+		<tr rel="'.$id.'">
 			<td'.($data['has_poster'] ? '>&nbsp;' : ' class="noposter">Mangler').'</td>
 			<td>'.htmlentities($data['title']).$aka.'</td>
 			<td>'.$data['year'].'</td>

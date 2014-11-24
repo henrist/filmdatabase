@@ -184,7 +184,12 @@ input.duration {
 
 
 .year_options { background-color: #EEEEEE; padding: 3px }
-.table-tr-odd td { background-color: #F8F8F8 }
+
+.table tbody tr:nth-child(odd) td {
+	background-color: #F8F8F8;
+}
+
+
 .table-th-sort-span { display: none }
 #filmer thead th { cursor: pointer }
 #filmer thead th.table-th-nosort { cursor: auto }

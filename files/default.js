@@ -3,7 +3,7 @@ var filmdata = {
 	// genres
 	// genres_count
 	// actors
-	
+
 	active_filter: {
 		title: null,
 		genres_pos: [],
@@ -21,261 +21,253 @@ var filmdata = {
 	filmer: null,
 	init: function()
 	{
-		this.filmer = $("filmer").getElement("tbody").getElements("tr");
+		this.filmer = $("#filmer tbody tr");
 		var self = this;
-		
+
 		// tittel
-		var soketterf = function()
+		$("#soketter").on("keyup change", function()
 		{
 			// endret seg?
-			if (self.active_filter.title != this.get("value"))
+			if (self.active_filter.title != $(this).val())
 			{
-				self.active_filter.title = this.get("value");
+				self.active_filter.title = $(this).val();
 				self.run_filter();
 			}
-		};
-		$("soketter").addEvents({
-			"keyup": soketterf,
-			"change": soketterf
 		});
-		
+
 		// nøkkelord
-		var sokkeywf = function()
+		$("#sokkeywords").on("keyup change", function()
 		{
 			// endret seg?
-			if (self.active_filter.keywords != this.get("value"))
+			if (self.active_filter.keywords != $(this).val())
 			{
-				self.active_filter.keywords = this.get("value");
+				self.active_filter.keywords = $(this).val();
 				self.run_filter();
 			}
-		};
-		$("sokkeywords").addEvents({
-			"keyup": sokkeywf,
-			"change": sokkeywf
 		});
-		
+
 		// sett opp checkbokser for sjangre
 		var p = [[
 				1,
-				$("genres_positive"),
+				$("#genres_positive"),
 				self.active_filter.genres_pos
 			],[
 				2,
-				$("genres_negative"),
+				$("#genres_negative"),
 				self.active_filter.genres_neg
 		]];
-		
+
 		var i = 0;
-		p.each(function(g)
+		$(p).each(function(i, g)
 		{
 			// sjangrene
-			self.genres.each(function(genre)
+			$(self.genres).each(function(key, genre)
 			{
-				new Element("label", {"for": "box"+g[0]+"_"+i, "text": genre})
-					.grab(new Element("span", {"class": "genres_count", "text": self.genres_count[genre]})
-						.grab(new Element("span", {"id": "genref_"+g[0]+"_"+genre, "class": "genre_filtered"}), "top"))
-					.inject(
-						new Element("input", {type: "checkbox", id: "box"+g[0]+"_"+i, "value": genre})
-							.addEvent("click", function()
-							{
-								g[2][this.get("checked") ? "include" : "erase"](this.get("value"));
-								self.run_filter();
-								this.getParent(".genre_box")[this.get("checked") ? "addClass" : "removeClass"]("genre_checked");
-							})
-							.inject(
-								new Element("span", {"class": "genre_box_inner"}).inject(
-								new Element("span", {"class": "genre_box"}).inject(g[1]))),
-						"after");
+				var id = "box"+g[0]+"_"+i,
+				    id2 = "genref_"+g[0]+"_"+genre;
+
+				$(g[1]).append(
+					$('<label>', {for: id}).append(
+						$('<span class="genre_box">').append(
+							$('<span class="genre_box_inner">').append(
+								$('<input type="checkbox">').attr("id", id).val(genre),
+								document.createTextNode(genre),
+								$('<span class="genres_count">').append(
+									$('<span class="genre_filtered">').attr("id", id2),
+									document.createTextNode(self.genres_count[genre])
+								)
+							)
+						)
+					)
+				);
+
 				i++;
 			});
-			
+
 			// nullstill-knapp
-			new Element("a", {"href": "#", "text": "Nullstill", "class": "genre_reset"}).addEvent("click", function(e)
+			$(g[1]).parent().find(".genre_pre").append(
+				$('<a href="#" class="genre_reset">Nullstill</a>').click(function() {
+					$(this).closest(".genre_wrap").find("input").prop("checked", false).each(function()
+					{
+						$(".genre_box").removeClass("genre_checked");
+					});
+					g[2].length = 0;
+					self.run_filter();
+				})
+			);
+
+			$(g[1]).find('.genre_box input').click(function()
 			{
-				e.stop();
-				this.getParent(".genre_wrap").getElements("input").set("checked", false).each(function(el)
-				{
-					g[2].erase(el.get("value"));
-					$$(".genre_box").removeClass("genre_checked");
-				});
+				var val = $(this).val();
+				if (this.checked) {
+					g[2].push(val);
+				} else {
+					var i = g[2].indexOf(val);
+					if (i != -1) {
+						g[2].splice(i, 1);
+					}
+					/*g[2] = jQuery.grep(g[2], function(item) {
+						return item != val;
+					});*/
+				}
+
 				self.run_filter();
-			}).inject(g[1].getParent().getElement(".genre_pre"));
+				$(this).parent(".genre_box")[this.checked ? "addClass" : "removeClass"]("genre_checked");
+			});
 		});
-		
+
 		// årstall
-		var yearf = function()
+		$(".yearinput").on("keyup change", function()
 		{
-			var t = this.get("id");
-			var v = this.get("value").toInt();
-			
+			var t = $(this).attr("id");
+			var v = parseInt($(this).val());
+
 			// ikke endret seg?
 			if (self.active_filter[t] == v) return;
 			self.active_filter[t] = v;
-			
+
 			// kjør filter om nødvendig
 			self.check_year();
-		};
-		$$(".yearinput").addEvents({
-			"keyup": yearf,
-			"change": yearf
 		});
-		$$(".year_options input").each(function(elm)
+
+		$(".year_options input").click(function()
 		{
-			elm.addEvent("click", function()
+			// ingen endring?
+			if ($(this).val() == self.active_filter.year_type) return;
+
+			if ($(this).val() == "between")
 			{
-				// ingen endring?
-				if (elm.get("value") == self.active_filter.year_type) return;
-				
-				if (elm.get("value") == "between")
-				{
-					$("year2c").removeClass("hide");
-					$($("year").get("value") != "" ? "year2" : "year").focus();
-				}
-				else
-				{
-					$("year2c").addClass("hide");
-					$("year").focus();
-				}
-				
-				self.active_filter.year_type = elm.get("value");
-				
-				// kjør filter om nødvendig
-				self.check_year();
-			});
+				$("#year2c").removeClass("hide");
+				$($("#year").val() != "" ? "year2" : "year").focus();
+			}
+			else
+			{
+				$("#year2c").addClass("hide");
+				$("#year").focus();
+			}
+
+			self.active_filter.year_type = $(this).val();
+
+			// kjør filter om nødvendig
+			self.check_year();
 		});
-		
+
 		// varighet
-		var dur_fromf = function() {
+		$("#dur_from").on("keyup change", function() {
 			// endret seg?
-			if (self.active_filter.dur_from != this.get("value")) {
-				self.active_filter.dur_from = parseInt(this.get("value"));
+			if (self.active_filter.dur_from != $(this).val()) {
+				self.active_filter.dur_from = parseInt($(this).val());
 				self.run_filter();
 			}
-		};
-		$("dur_from").addEvents({
-			"keyup": dur_fromf,
-			"change": dur_fromf
 		});
-		
-		var dur_tof = function() {
+
+		$("#dur_to").on("keyup change", function() {
 			// endret seg?
-			if (self.active_filter.dur_to != this.get("value")) {
-				self.active_filter.dur_to = parseInt(this.get("value"));
+			if (self.active_filter.dur_to != $(this).val()) {
+				self.active_filter.dur_to = parseInt($(this).val());
 				self.run_filter();
 			}
-		};
-		$("dur_to").addEvents({
-			"keyup": dur_tof,
-			"change": dur_tof
 		});
-		
+
 		// kvalitet/type
-		$$(".type_options input").addEvent("click", function(elm)
-		{
+		$(".type_options input").click(function() {
 			var n = [];
-			$$(".type_options input[checked]").each(function(el){ n.push(el.get("value")); });
-			
+			$(".type_options input[checked]").each(function(){
+				n.push($(this).val());
+			});
+
 			if (n.length == 0) n = null;
-			
+
 			if (n == self.active_filter.type) return;
 			self.active_filter.type = n;
-			
+
 			// kjør filter
 			self.run_filter();
 		});
-		
+
 		// funksjon for å vise/skjule kolonner
 		function show_col(id, hide)
 		{
-			var elms = $("filmer").getElements("th:nth-child("+id+"),td:nth-child("+id+")");
+			var elms = $("#filmer th:nth-child("+id+"), #filmer td:nth-child("+id+")");
 			if (hide) elms.addClass("hide");
 			else elms.removeClass("hide");
 		}
-		
+
 		// stryr boksene for å vise/skjule kolonner
-		$$("#enabled_cols input[type=checkbox]").each(function(elm)
+		$("#enabled_cols input[type=checkbox]:not(:checked)").each(function()
 		{
-			var id = elm.get("id").substring(8);
-			
-			// events
-			elm.addEvent("click", function()
-			{
-				show_col(id, !this.get("checked"));
-			});
-			
-			// skjule?
-			if (!elm.get("checked"))
-			{
-				show_col(id, true);
-			}
+			var id = $(this).attr("id").substring(8);
+			show_col(id, true);
 		});
-		
+		$("#enabled_cols input[type=checkbox]").click(function() {
+			var id = $(this).attr("id").substring(8);
+			show_col(id, !this.checked);
+		});
+
 		// for å aktivere posters første gangen
 		var posters_parsed = false;
-		$("showcol_1").addEvent("click", function()
+		$("#showcol_1").click(function()
 		{
 			if (posters_parsed) return;
 			posters_parsed = true;
-			
-			self.filmer.each(function(tr)
+
+			self.filmer.each(function()
 			{
-				var td = tr.getElement("td");
+				var td = $(this).find("td").first();
 				if (td.hasClass("noposter")) return;
-				
+
 				// legg til bildet
-				new Element("img").set("src", "?poster="+tr.get("rel")).inject(td.empty());
+				td.empty().append($('<img>', {'data-src': "?poster="+$(this).attr("rel")}).unveil());
 			});
 		});
-		
+
 		// vis feltene
-		$("filterarea").removeClass("hide");
-		$("setuparea").removeClass("hide");
-		
+		$("#filterarea").removeClass("hide");
+		$("#setuparea").removeClass("hide");
+
 		// sett fokus til tittelfeltet
-		$("soketter").focus();
-		
+		$("#soketter").focus();
+
 		// egen sortering for oppløsning og spilletid
-		HtmlTable.Parsers.movie_resolution = {
-			match: null,
-			convert: function() {
-				var x = this.get("text").split("x");
+		$.tablesorter.addParser({
+			id: 'movie_resolution',
+			is: function() { return false; },
+			format: function(s) {
+				var x = s.split('x');
 				if (x[1]) return x[0] * x[1];
 				return 0;
-			}
-		};
-		HtmlTable.Parsers.movie_rating = {
-			match: null,
-			convert: function() {
-				return this.get("text").toFloat() || 0;
-			}
-		};
-		HtmlTable.Parsers.movie_time = {
-			match: null,
-			convert: function() {
-				return this.get("text").toInt() || 0;
-			}
-		};
-		
-		// aktiver sortering av tabellen
-		this.sorter = new HtmlTable($("filmer"), {
-			sortable: true,
-			zebra: false,
-			parsers: [null, "string", "number", "movie_rating", "movie_time", null, "movie_resolution", "string", "string", "string", "string", null]
+			},
+			parsed: false,
+			type: 'numeric'
 		});
-		this.sorter.zebra = false;
-		this.sorter.addEvent("sort", function()
-		{
-			self.filmer = $("filmer").getElement("tbody").getElements("tr");
-			self.zebra();
+		$.tablesorter.addParser({
+			id: 'movie_rating',
+			is: function() { return false; },
+			format: function(s) {
+				return parseFloat(s) || 0;
+			},
+			parsed: false,
+			type: 'numeric'
 		});
-		
+		$.tablesorter.addParser({
+			id: 'movie_time',
+			is: function() { return false; },
+			format: function(s) {
+				return parseInt(s) || 0;
+			},
+			parsed: false,
+			type: 'numeric'
+		});
+
+		$('#filmer').tablesorter();
+
 		// sett opp skuespillere
-		this.actors_list = [];
-		for (key in this.actors)
-		{
-			this.actors_list.push({"name": key, "value": this.actors[key]});
-		}
-		
+		this.actors_list = jQuery.map(this.actors, function(key, val) {
+			return {"name": key, "value": val};
+		});
+
+		/*
+		FIXME
 		new Meio.Autocomplete.Select("actor", this.actors_list, {
 			//valueField:
 			//valueFilter: function(data) { return data.name },
@@ -295,9 +287,9 @@ var filmdata = {
 				self.active_filter.actors = null;
 				self.run_filter();
 			}
-		});
+		});*/
 	},
-	
+
 	check_year: function()
 	{
 		// sjekk om vi skal kjøre filter
@@ -308,7 +300,7 @@ var filmdata = {
 			this.active_filter.year_active = true;
 			this.run_filter();
 		}
-		
+
 		// har vi filter aktivert?
 		else if (this.active_filter.year_active)
 		{
@@ -316,45 +308,47 @@ var filmdata = {
 			this.run_filter();
 		}
 	},
-	
+
 	run_filter: function()
 	{
-		$("filmer").setStyle("visibility", "hidden");
-		
+		$("#filmer").css("visibility", "hidden");
+
 		var i = 0;
 		var self = this;
 		var alle = true;
 		var genres_pos = this.active_filter.genres_pos.length > 0 ? this.active_filter.genres_pos : null;
 		var genres_neg = this.active_filter.genres_neg.length > 0 ? this.active_filter.genres_neg : null;
 		var genres_stats = {};
-		this.filmer.each(function(tr)
+		this.filmer.each(function()
 		{
 			// skal denne vises?
 			var show = true;
-			var data = self.data[tr.get("rel")];
-			
+			var data = self.data[$(this).attr("rel")];
+
 			// type?
 			if (self.active_filter.type)
 			{
-				if (!self.active_filter.type.contains(data["type"])) show = false;
+				if (!jQuery.inArray(data['type'], self.active_filter.type)) show = false;
 			}
-			
+
 			// søke tittel?
 			if (show && self.active_filter.title)
 			{
 				var value = self.active_filter.title.replace(/  */g, ".*");
-				if (!data["title"] || !data["title"].test(value, "i"))
+				if (!data["title"] || !(new RegExp(value, 'i').test(data["title"])))
 				{
 					show = false;
-					
+
 					// søk aka
-					if (data["aka"]) data["aka"].each(function(val)
-					{
-						if (val.test(value, "i")) show = true;
-					});
+					if (data["aka"]) {
+						$(data["aka"]).each(function()
+						{
+							if (new RegExp(value, 'i').test(this)) show = true;
+						});
+					}
 				}
 			}
-			
+
 			// søk år?
 			if (show && self.active_filter.year_active)
 			{
@@ -363,21 +357,21 @@ var filmdata = {
 					case "exact":
 						show = data["year"] == self.active_filter.year;
 					break;
-					
+
 					case "before":
 						show = data["year"] <= self.active_filter.year;
 					break;
-					
+
 					case "after":
 						show = data["year"] >= self.active_filter.year;
 					break;
-					
+
 					case "between":
 						show = data["year"] >= self.active_filter.year && data["year"] <= self.active_filter.year2;
 					break;
 				}
 			}
-			
+
 			// søk varighet?
 			if (show && self.active_filter.dur_from) {
 				show = data["runtime"] >= self.active_filter.dur_from;
@@ -385,106 +379,92 @@ var filmdata = {
 			if (show && self.active_filter.dur_to) {
 				show = data["runtime"] <= self.active_filter.dur_to;
 			}
-			
+
 			// søk nøkkelord?
 			if (show && self.active_filter.keywords)
 			{
 				var f = false;
-				data.keywords.each(function(v)
+				$(data.keywords).each(function()
 				{
-					if (v.test(self.active_filter.keywords, "i")) f = true;
+					if (new RegExp(self.active_filter.keywords, "i").test(this)) f = true;
 				});
 				if (!f) show = false;
 			}
-			
+
 			// må inneholde sjanger?
 			if (show && genres_pos)
 			{
 				for (var x = 0; x < genres_pos.length; x++)
 				{
-					if (!data.genres.contains(genres_pos[x]))
+					if (jQuery.inArray(genres_pos[x], data.genres) == -1)
 					{
 						show = false;
 						break;
 					}
 				}
 			}
-			
+
 			// kan ikke inneholde sjanger?
 			if (show && genres_neg)
 			{
 				for (var x = 0; x < genres_neg.length; x++)
 				{
-					if (data.genres.contains(genres_neg[x]))
+					if (jQuery.inArray(genres_neg[x], data.genres) != -1)
 					{
 						show = false;
 						break;
 					}
 				}
 			}
-			
+
 			// søke skuespiller?
 			// TODO: søke etter flere skuespillere
 			if (show && self.active_filter.actors)
 			{
-				self.active_filter.actors.each(function(actor)
+				$(self.active_filter.actors).each(function()
 				{
-					if (!data.actors.contains(actor)) show = false;
+					if (!jQuery.inArray(this, data.actors)) show = false;
 				});
 			}
-			
+
 			if (show)
 			{
-				tr.removeClass("hide");
-				if (++i % 2 == 1) tr.addClass("table-tr-odd");
-				else tr.removeClass("table-tr-odd");
-				
+				i++;
+				$(this).removeClass("hide");
+
 				// lagre sjangerstats
-				data.genres.each(function(g)
+				$(data.genres).each(function()
 				{
-					if (!genres_stats[g]) genres_stats[g] = 0;
-					genres_stats[g]++;
+					if (!genres_stats[this]) genres_stats[this] = 0;
+					genres_stats[this]++;
 				});
 			}
-			
+
 			else
 			{
-				tr.addClass("hide");
+				$(this).addClass("hide");
 				alle = false;
 			}
 		});
-		
-		$("filmer").setStyle("visibility", "visible");
-		
+
+		$("#filmer").css("visibility", "visible");
+
 		// sett antall
-		$("countsearch").set("text", alle ? "" : i+"/");
-		
+		$("#countsearch").text(alle ? "" : i+"/");
+
 		// sett genre-antall
 		this.update_genres(genres_stats);
-		
+
 		// marker som filtrert eller ikke
-		$("filterarea")[alle ? "removeClass" : "addClass"]("filtered");
+		$("#filterarea")[alle ? "removeClass" : "addClass"]("filtered");
 	},
 	update_genres: function(stats)
 	{
-		this.genres.each(function(genre)
-		{
-			[1,2].each(function(i)
-			{
+		$(this.genres).each(function(b, genre) {
+			$([1,2]).each(function(a, i) {
 				var x = stats[genre] ? stats[genre] : 0;
-				$("genref_"+i+"_"+genre).set("text", x)
-					.getParent(".genre_box")[x ? "removeClass" : "addClass"]("genre_none");
+				$("#genref_"+i+"_"+genre).text(x).closest(".genre_box")[x ? "removeClass" : "addClass"]("genre_none");
 			});
-		});
-	},
-	zebra: function()
-	{
-		var i = 0;
-		this.filmer.each(function(tr)
-		{
-			if (tr.hasClass("hide")) return;
-			if (++i % 2 == 1) tr.addClass("table-tr-odd");
-			else tr.removeClass("table-tr-odd");
 		});
 	}
 };

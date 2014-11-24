@@ -16,18 +16,17 @@ Oppsett/installasjon
 med filmene, så må vanligvis kjøre på samme maskin som filmene ligger)
 * Opprett base/config.php filen basert på base/config.default.php
 * Rediger base/config.php til å passe ditt oppsett og behov
-* Legg inn MooTools som beskrivet nedenfor
 * Åpne nettsiden på adressen du har opprettet for siden
+
+Alternativt kan man også kjøre siden i enkelttilfeller ved hjelp av PHPs innebygde server:
+
+F.eks.: `$ php -S localhost:8000`
 
 
 Avhengigheter
 -------------
 
 For å hente ut informasjon fra filmfilene må man ha ffmpeg installert.
-
-Mootools må ligge på følgende adresse og inneholde både Core og More:
-/lib/mootools/mootools-1.2.x-yc.js
-(Endre evt. base/template/template.php)
 
 
 TODO

@@ -1,0 +1,12 @@
+{
+  "name": "filmdatabase",
+  "homepage": "https://github.com/henrist/filmdatabase",
+  "authors": [
+    "Henrik Steen <henrist@henrist.net>"
+  ],
+  "devDependencies": {
+    "jquery": "~2.1.1",
+    "jquery.tablesorter": "~2.18.3",
+    "jquery-unveil": "~1.3.0"
+  }
+}

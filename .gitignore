@@ -6,3 +6,4 @@ imdb_http.log
 .filmdata-data-cache
 .filmdata-path-id-cache
 vendor/
+bower_components/
