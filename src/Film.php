@@ -128,8 +128,7 @@ class Film
         }
 
         // rating
-        $m = preg_match('~ratingValue">([0-9\\.]+)<.*ratingCount">(.+?)<~', $this->imdb_data, $r);
-        //if (!$m) $m = preg_match('~<b>([0-9\\.]+)/10</b>.+?____>([0-9,]+) votes~s', $this->imdb_data, $r);
+        $m = preg_match('~ratingValue">([^<]+)<.*ratingCount">(.+?)<~s', $this->imdb_data, $r);
         if ($m)
         {
             $this->cache['rating'] = (float) $r[1];
@@ -137,7 +136,7 @@ class Film
         }
 
         // genre
-        if (preg_match_all('~<a.+?href="/(?:genre|Sections/Genres)/.+?".+?>([a-z\\-]+)</a>~is', $this->imdb_data, $r))
+        if (preg_match_all('~itemprop="genre">([a-z\\- ]+)</~is', $this->imdb_data, $r))
         {
             $this->cache['genres'] = $r[1];
         }
@@ -146,7 +145,7 @@ class Film
         if (preg_match('~(?:itemprop="director").+?</div>~s', $this->imdb_data, $r))
         #if (preg_match('~<div id="director-info.+?</div>~s', $this->imdb_data, $r))
         {
-            if (preg_match_all('~<a +href="/name/([^/]+)/.+?itemprop="name">([^<]+)</span~', $r[0], $r2))
+            if (preg_match_all('~href="/name/([^/]+)/.+?itemprop="name">([^<]+)</span~s', $r[0], $r2))
             {
                 $this->cache['directors_name_id'] = $r2[1];
                 $this->cache['directors'] = $r2[2];
@@ -157,7 +156,7 @@ class Film
         if (preg_match('~(?:itemprop="creator").+?</div>~s', $this->imdb_data, $r))
         {
             #if (preg_match_all('~<a +href="/name/([^/]+)/[^>]+>([^<]+)</a>(?: \\(([^\\)]+)\\))?~', $r[0], $r2))
-            if (preg_match_all('~<a +href="/name/([^/]+)/.+?itemprop="name">([^<]+)</span></a> +(?:\\(([^\\)]+)\\))~', $r[0], $r2))
+            if (preg_match_all('~href="/name/([^/]+)/.+?itemprop="name">([^<]+)</span></a> +(?:\\(([^\\)]+)\\))~s', $r[0], $r2))
             {
                 $this->cache['credits_name_id'] = $r2[1];
                 $this->cache['credits'] = $r2[2];
@@ -208,7 +207,7 @@ class Film
 
         // lanseringsdato
         // TODO: ny imdb-versjon?
-        if (preg_match('~<h5>Release Date:.+?<div[^>]+>(.+?)<~s', $this->imdb_data, $r))
+        if (preg_match('~itemprop="datePublished" content="(.+?)"~s', $this->imdb_data, $r))
         {
             $this->cache['releasedate'] = trim(strip_tags(html_entity_decode($r[1])));
         }
