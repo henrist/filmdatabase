@@ -92,7 +92,6 @@ class FilmDB
     public function get_ffmpeg() {
         if ($this->ffmpeg !== null) return $this->ffmpeg;
 
-        require_once "ffmpeg.php";
         try {
             $ffmpeg = new FFmpeg($this->set->ffmpeg_bin_path);
         } catch (Exception $e) {
