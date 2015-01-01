@@ -172,7 +172,7 @@ var filmdata = {
 		// kvalitet/type
 		$(".type_options input").click(function() {
 			var n = [];
-			$(".type_options input[checked]").each(function(){
+			$(".type_options input:checked").each(function(){
 				n.push($(this).val());
 			});
 
@@ -328,7 +328,7 @@ var filmdata = {
 			// type?
 			if (self.active_filter.type)
 			{
-				if (!jQuery.inArray(data['type'], self.active_filter.type)) show = false;
+				if (jQuery.inArray(data['type'], self.active_filter.type) == -1) show = false;
 			}
 
 			// søke tittel?
